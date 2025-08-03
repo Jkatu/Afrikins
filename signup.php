@@ -83,11 +83,11 @@ while ($row = $rRes->fetchArray(SQLITE3_ASSOC)) {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
     :root {
-      --bg: #f7f9fc;
-      --card: #ffffff;
+      --bg: #ffffff;           /* White background */
+      --card: #f0f7ff;         /* Very light blue cards */
       --radius: 12px;
-      --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-      --accent: #ff9800; /* warm orange */
+      --shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+      --accent: #007BFF;       /* Bootstrap-like blue */
       --text: #333333;
       --muted: #666666;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
@@ -131,8 +131,8 @@ while ($row = $rRes->fetchArray(SQLITE3_ASSOC)) {
       font-weight: 600;
     }
     input, select {
-      background: #fafafa;
-      border: 1px solid #ddd;
+      background: #ffffff;
+      border: 1px solid #ccc;
       padding: 12px 14px;
       border-radius: 8px;
       color: var(--text);
@@ -154,12 +154,12 @@ while ($row = $rRes->fetchArray(SQLITE3_ASSOC)) {
       color: #fff;
       transition: background-color .2s;
     }
-    .btn:hover { background-color: #e68900; }
+    .btn:hover { background-color: #0069d9; }
     .small { font-size: .85rem; color: var(--muted); }
     .sidebar h3 { margin-top: 0; }
     .role-note {
       font-size: .7rem;
-      background: #fff3e0;
+      background: #d9ecff; /* Pale blue highlight */
       padding: 6px 10px;
       border-radius: 6px;
       display: inline-block;
@@ -185,6 +185,7 @@ while ($row = $rRes->fetchArray(SQLITE3_ASSOC)) {
       color: #fff;
     }
 </style>
+
 
 </head>
 <body>
