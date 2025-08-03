@@ -86,7 +86,7 @@ while ($row = $rRes->fetchArray(SQLITE3_ASSOC)) {
       --bg:#0f172a;
       --card:#1f2a44;
       --radius:12px;
-      --shadow:0 20px 40px -10px rgba(15,23,42,.5);
+      --shadow:0 20px 40px -10px rgba(66, 120, 202, 0.5);
       --accent:#ffb347;
       --text:#e8ecf8;
       --muted:#9aa3c1;
