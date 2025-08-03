@@ -54,7 +54,7 @@
         </p>
         <p>
             Our mission is to preserve heritage, challenge stereotypes, and inspire through authentic African storytelling. 
-            We also 
+            We also want to show
             Join us in shaping how Africa is seen and remembered for generations to come.
 
 
