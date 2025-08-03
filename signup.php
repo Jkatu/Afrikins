@@ -1,93 +1,290 @@
 <?php
-// DEBUGGING / show errors during development
+// development: show errors (remove in production)
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-// open SQLite DB
+// SQLite DB path (absolute)
 $dbPath = 'E:/classdb.db';
- // adjust path if it's in a different folder
 $db = new SQLite3($dbPath);
 $db->exec('PRAGMA foreign_keys = ON;');
 
-// Fetch genders
+// bootstrap schema if missing
+$db->exec('
+CREATE TABLE IF NOT EXISTS gender (
+    genderId INTEGER PRIMARY KEY AUTOINCREMENT,
+    gender TEXT NOT NULL UNIQUE DEFAULT "",
+    dateCreate DATETIME DEFAULT (CURRENT_TIMESTAMP),
+    dateUpdate DATETIME DEFAULT (CURRENT_TIMESTAMP)
+);
+');
+$db->exec('
+CREATE TABLE IF NOT EXISTS roles (
+    roleId INTEGER PRIMARY KEY AUTOINCREMENT,
+    role TEXT NOT NULL UNIQUE DEFAULT "",
+    dateCreate DATETIME DEFAULT (CURRENT_TIMESTAMP),
+    dateUpdate DATETIME DEFAULT (CURRENT_TIMESTAMP)
+);
+');
+$db->exec('
+CREATE TABLE IF NOT EXISTS users (
+    userId INTEGER PRIMARY KEY AUTOINCREMENT,
+    fullname TEXT NOT NULL DEFAULT "",
+    email TEXT NOT NULL UNIQUE DEFAULT "",
+    phone TEXT NOT NULL DEFAULT "",
+    username TEXT NOT NULL UNIQUE DEFAULT "",
+    password TEXT NOT NULL DEFAULT "",
+    token TEXT,
+    status INTEGER NOT NULL DEFAULT 0,
+    roleId INTEGER NOT NULL DEFAULT 0,
+    genderId INTEGER NOT NULL DEFAULT 0,
+    userCreated DATETIME DEFAULT (CURRENT_TIMESTAMP),
+    userUpdated DATETIME DEFAULT (CURRENT_TIMESTAMP)
+);
+');
+
+// seed if empty
+if ($db->querySingle("SELECT COUNT(*) FROM gender") == 0) {
+    $db->exec("
+        INSERT INTO gender (gender, dateCreate, dateUpdate) VALUES
+        ('Female', '2025-07-17 16:46:30', '2025-07-17 16:46:30'),
+        ('Male', '2025-07-17 16:46:30', '2025-07-17 16:46:30'),
+        ('Rather not say', '2025-07-17 16:46:30', '2025-07-17 16:46:30')
+    ");
+}
+if ($db->querySingle("SELECT COUNT(*) FROM roles") == 0) {
+    $db->exec("
+        INSERT INTO roles (role, dateCreate, dateUpdate) VALUES
+        ('Admin', '2025-07-17 16:46:30', '2025-07-17 16:46:30'),
+        ('Producer', '2025-07-17 16:46:30', '2025-07-17 16:46:30'),
+        ('Director', '2025-07-17 16:46:30', '2025-07-17 16:46:30'),
+        ('Cinematographer', '2025-07-17 16:46:30', '2025-07-17 16:46:30'),
+        ('Editor', '2025-07-17 16:46:30', '2025-07-17 16:46:30'),
+        ('Researcher', '2025-07-17 16:46:30', '2025-07-17 16:46:30')
+    ");
+}
+
+// load dropdown data
 $genders = [];
 $roles = [];
-$res = $db->query('SELECT genderId, gender FROM gender ORDER BY gender;');
-while ($r = $res->fetchArray(SQLITE3_ASSOC)) {
-    $genders[] = $r;
+$gRes = $db->query('SELECT genderId, gender FROM gender ORDER BY gender;');
+while ($row = $gRes->fetchArray(SQLITE3_ASSOC)) {
+    $genders[] = $row;
 }
-$res = $db->query('SELECT roleId, role FROM roles ORDER BY role;');
-while ($r = $res->fetchArray(SQLITE3_ASSOC)) {
-    $roles[] = $r;
+$rRes = $db->query('SELECT roleId, role FROM roles ORDER BY role;');
+while ($row = $rRes->fetchArray(SQLITE3_ASSOC)) {
+    $roles[] = $row;
 }
 ?>
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Sign Up</title>
+  <title>Afrikins Documentary Team — Sign Up</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body { font-family: sans-serif; max-width: 800px; margin: 1em auto; }
-    form input, form select { display: block; margin: .5em 0; padding: .4em; width: 100%; max-width: 400px; }
-    .row { display: flex; gap: 2rem; flex-wrap: wrap; }
-    .content { flex: 2; }
-    .sidebar { flex: 1; background:#f7f7f7; padding:1em; border-radius:6px; }
+    :root {
+      --bg:#0f172a;
+      --card:#1f2a44;
+      --radius:12px;
+      --shadow:0 20px 40px -10px rgba(15,23,42,.5);
+      --accent:#ffb347;
+      --text:#e8ecf8;
+      --muted:#9aa3c1;
+      font-family: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;
+    }
+    * {box-sizing:border-box;}
+    body {
+      margin:0;
+      background: linear-gradient(135deg,#0f172a 0%,#1f2a44 70%);
+      color: var(--text);
+      min-height:100vh;
+      line-height:1.45;
+      padding:2rem 1rem;
+    }
+    .container {
+      max-width: 1100px;
+      margin:0 auto;
+      display:grid;
+      gap:2rem;
+      grid-template-columns: 2fr 1fr;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding:2rem;
+      box-shadow: var(--shadow);
+    }
+    h1, h2 {margin-top:0; font-weight:600;}
+    .subtitle {color: var(--muted); margin-bottom:1rem;}
+    form {
+      display:grid;
+      gap:1rem;
+    }
+    .grid-two {
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+      gap:1rem;
+    }
+    label {
+      display:block;
+      font-size:.85rem;
+      margin-bottom:.25rem;
+      text-transform: uppercase;
+      letter-spacing:1px;
+      font-weight:600;
+    }
+    input, select {
+      background:#0f1c3e;
+      border:1px solid rgba(255,255,255,.1);
+      padding:12px 14px;
+      border-radius:8px;
+      color: var(--text);
+      font-size:1rem;
+      width:100%;
+    }
+    input:focus, select:focus {outline:2px solid var(--accent);}
+    .btn {
+      background: var(--accent);
+      border:none;
+      padding:14px 20px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+      letter-spacing:1px;
+      color:#1f2a44;
+      transition:filter .2s;
+    }
+    .btn:hover {filter:brightness(1.05);}
+    .small {font-size:.85rem; color: var(--muted);}
+    .sidebar h3 {margin-top:0;}
+    .role-note {
+      font-size:.7rem;
+      background: rgba(255,255,255,.05);
+      padding:6px 10px;
+      border-radius:6px;
+      display:inline-block;
+      margin-bottom:8px;
+    }
+    .footer {
+      margin-top:3rem;
+      text-align:center;
+      font-size:.8rem;
+      color: var(--muted);
+    }
+    a {color: var(--accent); text-decoration:none;}
+    .inline-link {font-size:.9rem;}
+    .flex {display:flex; gap:1rem; flex-wrap:wrap;}
+    .badge {background: var(--accent); padding:4px 10px; border-radius:999px; font-size:.65rem; text-transform:uppercase; letter-spacing:1px; font-weight:700;}
   </style>
 </head>
 <body>
 
-  <div class="row">
-    <div class="content">
-      <h2>Sign Up</h2>
+  <div class="container">
+    <!-- main content -->
+    <div class="card">
+      <div class="flex" style="justify-content:space-between; align-items:center;">
+        <div>
+          <h1>Afrikins Documentary Team</h1>
+          <div class="subtitle">Telling Africa's stories through authentic documentaries.</div>
+        </div>
+        <div class="badge">Join Us</div>
+      </div>
 
-      <form action="proc/processes.php" method="post">
-        <input type="text" name="fullname" placeholder="Enter your full name" required autofocus/>
-        <input type="email" name="email" placeholder="Enter your email address" required />
-        <input type="tel" name="phone" placeholder="Enter your phone number" maxlength="13" required />
+      <p>We are a collective of storytellers, researchers, and filmmakers dedicated to producing documentaries that amplify African voices, preserve heritage, and illuminate hidden narratives. Sign up to collaborate, contribute, or follow our journey.</p>
 
-        <label for="genderId">Select gender</label>
-        <select name="genderId" id="genderId" required>
-          <option value="">Select your gender</option>
-          <?php foreach ($genders as $g): ?>
-            <option value="<?= htmlspecialchars($g['genderId']) ?>"><?= htmlspecialchars($g['gender']) ?></option>
-          <?php endforeach; ?>
-        </select>
+      <h2>Create your account</h2>
+      <p class="small">Membership gives you access to project dashboards, collaboration tools, and early previews of upcoming documentaries.</p>
 
-        <label for="roleId">Select role</label>
-        <select name="roleId" id="roleId" required>
-          <option value="">Select your role</option>
-          <?php foreach ($roles as $r): ?>
-            <?php if ($r['role'] === 'Admin') continue; ?>
-            <option value="<?= htmlspecialchars($r['roleId']) ?>"><?= htmlspecialchars($r['role']) ?></option>
-          <?php endforeach; ?>
-        </select>
+      <form action="proc/processes.php" method="post" autocomplete="off" novalidate>
+        <div class="grid-two">
+          <div>
+            <label for="fullname">Full Name</label>
+            <input type="text" name="fullname" id="fullname" placeholder="e.g., Amina Odhiambo" required autofocus>
+          </div>
+          <div>
+            <label for="username">Username</label>
+            <input type="text" name="username" id="username" placeholder="pick a handle" required>
+          </div>
+        </div>
 
-        <input type="text" name="username" placeholder="Create a username" required />
-        <input type="password" name="password" placeholder="Create a password" required />
-        <input type="password" name="confirm_password" placeholder="Confirm your password" required />
+        <div class="grid-two">
+          <div>
+            <label for="email">Email Address</label>
+            <input type="email" name="email" id="email" placeholder="you@domain.com" required>
+          </div>
+          <div>
+            <label for="phone">Phone</label>
+            <input type="tel" name="phone" id="phone" placeholder="+2547XXXXXXXX" maxlength="13" required>
+          </div>
+        </div>
 
-        <br>
-        <input type="submit" name="signup" value="Sign Up" />
-        <p><a href="signin.php">Already have an account? Sign In</a></p>
+        <div class="grid-two">
+          <div>
+            <label for="genderId">Gender</label>
+            <select name="genderId" id="genderId" required>
+              <option value="">Select gender</option>
+              <?php foreach ($genders as $g): ?>
+                <option value="<?= htmlspecialchars($g['genderId'], ENT_QUOTES) ?>"><?= htmlspecialchars($g['gender'], ENT_QUOTES) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div>
+            <label for="roleId">Role / Contribution</label>
+            <select name="roleId" id="roleId" required>
+              <option value="">Select your role</option>
+              <?php foreach ($roles as $r): ?>
+                <?php if (strtolower($r['role']) === 'admin') continue; /* hide admin */ ?>
+                <option value="<?= htmlspecialchars($r['roleId'], ENT_QUOTES) ?>"><?= htmlspecialchars($r['role'], ENT_QUOTES) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-two">
+          <div>
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" placeholder="Create a password" required>
+          </div>
+          <div>
+            <label for="confirm_password">Confirm Password</label>
+            <input type="password" name="confirm_password" id="confirm_password" placeholder="Re-type password" required>
+          </div>
+        </div>
+
+        <div style="margin-top:1rem;">
+          <input type="submit" name="signup" value="Sign Up" class="btn">
+          <p class="small inline-link">Already part of Afrikins? <a href="signin.php">Sign in</a></p>
+        </div>
       </form>
 
-      <p>HTML forms enable you to gather user input ...</p>
-      <p>You are required to create the following forms on the appropriate pages:</p>
-      <ul>
-        <li>Contact Us form</li>
-        <li>Sign Up form</li>
-        <li>Sign In form</li>
-      </ul>
-
-      <h2>Learn More About Our Team and Mission</h2>
-      <p>sed quia non numquam eius modi tempora ...</p>
+      <div style="margin-top:2rem; display:flex; gap:2rem; flex-wrap:wrap;">
+        <div style="flex:1; min-width:200px;">
+          <h3>Why Afrikins?</h3>
+          <p class="small">We center African perspectives—the stories you won’t find in mainstream archives. From oral histories to contemporary social change, our documentaries connect communities across the continent.</p>
+        </div>
+        <div style="flex:1; min-width:200px;">
+          <h3>What you get</h3>
+          <ul class="small">
+            <li>Early access to film cuts</li>
+            <li>Invitation to collaborative research</li>
+            <li>Credits on projects you contribute to</li>
+          </ul>
+        </div>
+      </div>
     </div>
 
-    <div class="sidebar">
-      <h2>Side Bar</h2>
-      <p>We are a team of dedicated professionals committed to delivering high-quality services and products.</p>
-      <p>This is the about page. It contains information about the website, its purpose, and the team behind it. You can find details on our mission, vision, and values here. We aim to provide a comprehensive overview of our services and how we can help you achieve your goals.</p>
+    <!-- sidebar -->
+    <div class="card sidebar">
+      <h2>About Afrikins Documentaries</h2>
+      <p>Afrikins is a passionate team of documentary makers, archivists, and storytellers dedicated to capturing the richness of African cultures, histories, and contemporary lives. We seek to empower local voices, expose untold stories, and build a living archive through film.</p>
+      <p class="small">Whether you are a researcher, cinematographer, editor, or community partner, your contribution shapes narratives that resonate across generations.</p>
+      <div class="role-note">Roles include: Producer, Director, Cinematographer, Editor, Researcher</div>
+      <p class="small">Join us in preserving stories that matter. Your perspective can redefine how Africa is seen and remembered.</p>
     </div>
+  </div>
+
+  <div class="footer">
+    &copy; <?= date('Y') ?> Afrikins Documentary Collective. All rights reserved.
   </div>
 
 </body>
