@@ -276,7 +276,7 @@ while ($row = $rRes->fetchArray(SQLITE3_ASSOC)) {
         <div style="flex:1; min-width:200px;">
           <h3>What you get</h3>
           <ul class="small">
-            <li>Early  and access to film cuts</li>
+            <li>Early and easy access to film cuts</li>
             <li>Invitation to collaborative research</li>
             <li>Credits on projects you contribute to</li>
           </ul>
