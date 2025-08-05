@@ -24,7 +24,7 @@
             with our platform. We reserve the right to remove content or suspend accounts that violate these principles.
         </p>
 
-        <h2>Collaboration and Contributions</h2>
+        <h2>Collaborations and Contributions</h2>
         <p>
             Afrikins welcomes contributions from filmmakers, researchers, and cultural advocates. By submitting material, you 
             confirm that you own the rights to it or have obtained the necessary permissions. Contributions may be edited for 
@@ -55,7 +55,7 @@
         <p>
             Our mission is to preserve heritage, challenge stereotypes, and inspire through authentic African storytelling. 
             We also want to show
-            Join us in shaping how Africa is seen and remembered for generations to come.
+            Join us in shaping ho1w Africa is seen and remembered for generations to come.
 
 
         </p>
