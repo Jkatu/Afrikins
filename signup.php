@@ -279,7 +279,7 @@ while ($row = $rRes->fetchArray(SQLITE3_ASSOC)) {
             <li>Early and easy access to film cuts</li>
             <li>Invitation to collaborative research</li>
             <li>Credits on projects you contribute to</li>
-            <li>Unlimited access to document </li>
+            <li>Unlimited access to documentaries </li>
           </ul>
         </div>
       </div>
