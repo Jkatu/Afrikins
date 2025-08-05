@@ -35,7 +35,7 @@
         <p>
             We are committed to truthful storytelling that amplifies African voices, preserves heritage, and challenges stereotypes. 
             Every project we take on is handled with professionalism, cultural respect, and a dedication to excellence.
-            We are commited 
+            We are commited to bringing you first hand information
         </p>
     </div>
 
